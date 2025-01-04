@@ -1,70 +1,68 @@
 # Import necessary libraries
-import os
-import sqlite3
 import streamlit as st
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# Check and handle missing dependencies
-try:
-    import pdfplumber
-except ImportError:
-    os.system('pip install pdfplumber')
-    import pdfplumber
-
-try:
-    from docx import Document
-except ImportError:
-    os.system('pip install python-docx')
-    from docx import Document
-
-try:
-    import pandas as pd
-except ImportError:
-    os.system('pip install pandas')
-    import pandas as pd
-
-# Function to check SQLite3 installation
-def check_sqlite():
-    try:
-        st.write(f"SQLite version: {sqlite3.sqlite_version}")
-    except Exception as e:
-        st.error(f"SQLite3 error: {str(e)}. Ensure your Python installation includes the standard library.")
+# Initialize global variables for chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = ""
 
 # Streamlit app code
 def main():
-    st.title("Document Analysis with PDF and Word")
-    st.write("This application demonstrates the use of SQLite3, pdfplumber, and Streamlit.")
-    
-    # File uploader
-    uploaded_file = st.file_uploader("Upload a PDF or Word Document", type=["pdf", "docx"])
-    
-    if uploaded_file:
-        file_name, file_extension = os.path.splitext(uploaded_file.name)
-        
-        if file_extension == ".pdf":
-            st.write("Processing PDF file...")
-            try:
-                with pdfplumber.open(uploaded_file) as pdf:
-                    text = ""
-                    for page in pdf.pages:
-                        text += page.extract_text()
-                    st.text_area("Extracted Text", value=text, height=300)
-            except Exception as e:
-                st.error(f"Error processing PDF: {str(e)}")
-        
-        elif file_extension == ".docx":
-            st.write("Processing Word file...")
-            try:
-                doc = Document(uploaded_file)
-                text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
-                st.text_area("Extracted Text", value=text, height=300)
-            except Exception as e:
-                st.error(f"Error processing Word document: {str(e)}")
-        else:
-            st.warning("Unsupported file type.")
-    
-    # SQLite3 check
-    st.header("SQLite3 Version Check")
-    check_sqlite()
+    st.title("ChatGPT-like Application")
+    st.write("Ask anything, and the AI will respond!")
 
+    # Text input for user query
+    user_input = st.text_input("Your Message:", placeholder="Type your message here...")
+
+    # Button to submit the query
+    if st.button("Send"):
+        if user_input.strip() == "":
+            st.error("Please enter a message!")
+        else:
+            # Append user query to chat history
+            st.session_state.chat_history += f"\nYou: {user_input}"
+            
+            # Generate response
+            response = generate_response(user_input)
+
+            # Append AI response to chat history
+            st.session_state.chat_history += f"\nAI: {response}"
+
+    # Display chat history
+    st.header("Chat History")
+    st.text_area("Conversation", value=st.session_state.chat_history, height=300)
+
+# Function to generate a response using a text-generation model
+def generate_response(prompt):
+    # Initialize the model and tokenizer
+    model_name = "gpt2"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+
+    # Tokenize the prompt
+    inputs = tokenizer(
+        prompt,
+        return_tensors="pt",
+        truncation=True,
+        return_attention_mask=True
+        )
+    
+    # Generate the response with adjusted parameters
+    outputs = model.generate(
+        inputs['input_ids'], 
+        max_length=250, 
+        num_return_sequences=1, 
+        pad_token_id=tokenizer.eos_token_id, 
+        temperature=0.7, 
+        top_p=0.9, 
+        repetition_penalty=2.0  # Reduce repetition
+    )
+
+    # Decode the generated response
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    return response
+
+# Call the main function to run the app
 if __name__ == "__main__":
     main()
