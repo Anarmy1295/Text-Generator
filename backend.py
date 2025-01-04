@@ -35,7 +35,8 @@ def main():
 # Function to generate a response using a text-generation model
 def generate_response(prompt):
     # Initialize the model and tokenizer
-    model_name = "gpt2"
+    # model_name = "gpt2"  # You can use other models like 'EleutherAI/gpt-neo-125M'
+    model_name = "EleutherAI/gpt-neo-1.3B"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name)
 
@@ -46,22 +47,22 @@ def generate_response(prompt):
         truncation=True,
         return_attention_mask=True
         )
-    
-    # Generate the response with adjusted parameters
-    outputs = model.generate(
-        inputs['input_ids'], 
-        max_length=250, 
-        num_return_sequences=1, 
-        pad_token_id=tokenizer.eos_token_id, 
-        temperature=0.7, 
-        top_p=0.9, 
-        repetition_penalty=2.0  # Reduce repetition
-    )
 
-    # Decode the generated response
+    outputs = model.generate(
+        inputs['input_ids'],
+        attention_mask=inputs['attention_mask'],
+        max_new_tokens=250,  # Număr maxim de tokeni generați
+        num_return_sequences=1,
+        temperature=0.5, 
+        do_sample=True,
+        top_p=0.7, 
+        repetition_penalty=2.0  # Penalizare pentru repetare
+        )
+
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    return response
+    # return response
+    return response[len(prompt):].strip()
 
 # Call the main function to run the app
 if __name__ == "__main__":
