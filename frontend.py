@@ -225,49 +225,50 @@ def main_page():
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
-    # if "pdf/doc" not in st.session_state:
-    #     st.session_state["pdf/doc"] = False
+    if "pdf/doc" not in st.session_state:
+        st.session_state["pdf/doc"] = False
+
+    if "copie" not in st.session_state:
+        st.session_state["copie"] = None
 
     
-    # uploaded_file = st.file_uploader("Upload a PDF or Word Document", type=["pdf", "docx"])
+    uploaded_file = st.file_uploader("Upload a PDF or Word Document", type=["pdf", "docx"])
     
-    # if uploaded_file:
-    #     st.session_state["pdf/doc"] = True
-    #     file_name, file_extension = os.path.splitext(uploaded_file.name)
-        
-    #     if file_extension == ".pdf":
-    #         st.write("Processing PDF file...")
-    #         try:
-    #             with pdfplumber.open(uploaded_file) as pdf:
-    #                 text = ""
-    #                 for page in pdf.pages:
-    #                     text += page.extract_text()
-    #                 # st.text_area("Extracted Text", value=text, height=300)
-    #         except Exception as e:
-    #             st.error(f"Error processing PDF: {str(e)}")
-        
-    #     elif file_extension == ".docx":
-    #         st.write("Processing Word file...")
-    #         try:
-    #             doc = Document(uploaded_file)
-    #             text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
-    #             # st.text_area("Extracted Text", value=text, height=300)
-    #         except Exception as e:
-    #             st.error(f"Error processing Word document: {str(e)}")
-    #     else:
-    #         st.warning("Unsupported file type.")
+    if uploaded_file:
+        if uploaded_file != st.session_state["copie"]:
+            st.session_state["copie"] = uploaded_file 
+            st.session_state["pdf/doc"] = True
+            file_name, file_extension = os.path.splitext(uploaded_file.name)
+            
+            if file_extension == ".pdf":
+                st.write("Processing PDF file...")
+                try:
+                    with pdfplumber.open(uploaded_file) as pdf:
+                        text = ""
+                        for page in pdf.pages:
+                            text += page.extract_text()
+                except Exception as e:
+                    st.error(f"Error processing PDF: {str(e)}")
+            
+            elif file_extension == ".docx":
+                st.write("Processing Word file...")
+                try:
+                    doc = Document(uploaded_file)
+                    text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+                except Exception as e:
+                    st.error(f"Error processing Word document: {str(e)}")
+            else:
+                st.warning("Unsupported file type.")
 
-    #     st.session_state["messages"].append({"role": "user", "content":"file", "last": False})
+            st.session_state["messages"].append({"role": "user", "content":"file", "last": False})
 
-    #     # genereaza raspuns in functie de mod
-    #     if st.session_state["chat_mode"] == "faster":
-    #         assistant_response = f"{text}"
-    #     else:
-    #         assistant_response = "da"
-        
-    #     st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
-
-    #     uploaded_file = None
+            # genereaza raspuns in functie de mod
+            if st.session_state["chat_mode"] == "faster":
+                assistant_response = f"{text}"
+            else:
+                assistant_response = "da"
+            
+            st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
 
     
     if prompt := st.chat_input("Say something"):
@@ -319,12 +320,31 @@ def main_page():
                 # text progresiv
                 output_text = ""
                 for word in animated_text_display(text):
+                  
+                    if st.session_state.stop_flag:
+                        st.session_state["messages"][i]["content"] = st.session_state.text_saver
+                        break
+
                     output_text += word
+                    st.session_state.text_saver = output_text
+                
                     container.markdown(
                         f"""
                         <div class="chat-assistant-container">
                             <img src="data:image/jpeg;base64,{bot_image_base64}" class="chat-avatar" alt="Assistant Avatar"/>
                             <div class="chat-assistant">{st.session_state["settings"]["bot_name"] + ": " + output_text}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                        )
+
+                if st.session_state.stop_flag:
+                    st.session_state.stop_flag = False
+                    container.markdown(
+                        f"""
+                        <div class="chat-assistant-container">
+                            <img src="data:image/jpeg;base64,{bot_image_base64}" class="chat-avatar" alt="Assistant Avatar"/>
+                            <div class="chat-assistant">{st.session_state["settings"]["bot_name"] + ": " + st.session_state["messages"][i]["content"]}</div>
                         </div>
                         """,
                         unsafe_allow_html=True,
@@ -435,6 +455,8 @@ def options_menu():
             st.write(" ")
             st.write("You are in lower quality mode")
 
+        st.button("Stop generate", on_click=stop_generation)
+
     with tab2:
         st.title("Preferences")
 
@@ -463,7 +485,6 @@ def options_menu():
             st.session_state["settings"]["font"] = font
             st.rerun()
 
-        #st.write("Settings saved!")
     with tab3:
         st.title("User Settings")
 
@@ -517,8 +538,6 @@ def options_menu():
                     if "info_reset" not in st.session_state:
                         info_reset()
 
-                    # st.session_state["page"] = "autentification"
-                    # st.rerun()
                 else:
                     st.error("User does not exist!")
 
@@ -536,6 +555,8 @@ def options_menu():
         st.header("Log Out")
 
         if st.button("Log Out"):
+            st.session_state["messages"] = []
+            st.session_state["started_chat"] = False
 
             if "vote" in st.session_state:
                 del st.session_state['vote']
@@ -592,6 +613,18 @@ def info_reset():
 
 if "user_data" not in st.session_state:
     st.session_state["user_data"] = {}
+
+if "copie" not in st.session_state:
+    st.session_state["copie"] = None
+
+if "stop_flag" not in st.session_state:
+    st.session_state.stop_flag = False
+
+if "text_saver" not in st.session_state:
+    st.session_state.text_saver = ""
+ 
+def stop_generation():
+    st.session_state.stop_flag = True
 
 if "page" not in st.session_state:
     st.session_state["page"] = "autentification"
