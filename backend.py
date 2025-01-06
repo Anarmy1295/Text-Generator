@@ -1,39 +1,65 @@
 # Import necessary libraries
 import streamlit as st
-# from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+# from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 
-# Initialize global variables for chat history
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = ""
+# # Initialize global variables for chat history
+# if "chat_history" not in st.session_state:
+#     st.session_state.chat_history = ""
 
-MODEL_NAME = "gpt2-medium"
-# MODEL_NAME = "gpt2-large"
-model_name = "EleutherAI/gpt-neo-1.3B"
+# MODEL_NAME = "gpt2-medium"
+# # MODEL_NAME = "gpt2-large"
+# model_name = "EleutherAI/gpt-neo-1.3B"
 
-try:
-    tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
-    model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
+# try:
+#     # tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
+#     # model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
 
-    model = GPT2LMHeadModel.from_pretrained(MODEL_NAME, torch_dtype=torch.float16)
-    if torch.cuda.is_available():
-        model.to('cuda')
+#     # model = GPT2LMHeadModel.from_pretrained(MODEL_NAME, torch_dtype=torch.float16)
+#     # if torch.cuda.is_available():
+#     #     model.to('cuda')
 
-    # tokenizer = AutoTokenizer.from_pretrained(model_name)
-    # model = AutoModelForCausalLM.from_pretrained(model_name)
+#     tokenizer = AutoTokenizer.from_pretrained(model_name)
+#     model = AutoModelForCausalLM.from_pretrained(model_name)
 
-    model.eval()
-    if torch.cuda.is_available():
-        model.to('cuda')
-except Exception as e:
-    print(f"Error loading the model: {e}")
-    raise
+#     model.eval()
+#     if torch.cuda.is_available():
+#         model.to('cuda')
+# except Exception as e:
+#     print(f"Error loading the model: {e}")
+#     raise
 
 # Streamlit app code
-def main():
+def main_screen():
     st.title("ChatGPT-like Application")
     st.write("Ask anything, and the AI will respond!")
+
+    # Initialize global variables for chat history
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = ""
+
+    MODEL_NAME = "gpt2-medium"
+    # MODEL_NAME = "gpt2-large"
+    model_name = "EleutherAI/gpt-neo-1.3B"
+
+    try:
+        # tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
+        # model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
+
+        # model = GPT2LMHeadModel.from_pretrained(MODEL_NAME, torch_dtype=torch.float16)
+        # if torch.cuda.is_available():
+        #     model.to('cuda')
+
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name)
+
+        model.eval()
+        if torch.cuda.is_available():
+            model.to('cuda')
+    except Exception as e:
+        print(f"Error loading the model: {e}")
+        raise
 
     # Text input for user query
     user_input = st.text_input("Your Message:", placeholder="Type your message here...")
@@ -157,4 +183,4 @@ def generate_response(prompt):
 
 # Call the main function to run the app
 if __name__ == "__main__":
-    main()
+    main_screen()
