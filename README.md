@@ -7,12 +7,14 @@ This application, developed using Streamlit, provides a user-friendly interface 
 2) Github link
 
 3) Technologies used
+
 Frontend: streamlit, sqlite3, hashlib, base64, time, pdfplumber
 
-4) Running instructions
+5) Running instructions
+
 streamlit run app_name
 
-5) Team Contributions and Challenges Faced
+7) Team Contributions and Challenges Faced
 
 Delia-Maria Rizescu: I contributed to the development of the application's frontend using Streamlit. I implemented features such as log in/create account, the sidebar navigation menu, sections for profile and preference configuration, as well as options for text generation. Additionally, I integrated mechanisms that allow users to personalize their experience, such as changing the text font or setting a custom avatar for the bot.
 The main difficulty I faced was getting used to Streamlit since it was something entirely new to me. Adapting to its structure and learning how to use its components effectively required additional time and effort. By exploring the documentation, experimenting with features, and resolving issues as they came up, I managed to implement the functionalities. Another challenge was the addition of new functionalities that required changes to existing ones. For example, initially, I only planned for a database with usernames and passwords, but later I had to modify it to associate a picture with each account. This required ensuring the images were correctly saved in the database.
