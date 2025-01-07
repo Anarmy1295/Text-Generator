@@ -8,7 +8,7 @@ import os
 import tempfile
 import pdfplumber
 from docx import Document
-
+from backend import generate_response
 
 def option_func():
     # titlul de inceput
@@ -264,9 +264,10 @@ def main_page():
 
             # genereaza raspuns in functie de mod
             if st.session_state["chat_mode"] == "faster":
-                assistant_response = f"{text}"
+                # assistant_response = f"{text}"
+                assistant_response = generate_response(text, "faster")
             else:
-                assistant_response = "da"
+                assistant_response = generate_response(text, "slower")
             
             st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
 
@@ -279,9 +280,10 @@ def main_page():
 
         # genereaza raspuns in functie de mod
         if st.session_state["chat_mode"] == "faster":
-            assistant_response = f"{prompt}"
+            # assistant_response = f"{prompt}"
+            assistant_response = generate_response(prompt, "faster")
         else:
-            assistant_response = "da"
+            assistant_response = generate_response(prompt, "slower")
         
         st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
 
@@ -611,37 +613,40 @@ def info_reset():
         st.session_state["page"] = "autentification"
         st.rerun()
 
-if "user_data" not in st.session_state:
-    st.session_state["user_data"] = {}
+# if "user_data" not in st.session_state:
+#     st.session_state["user_data"] = {}
 
-if "copie" not in st.session_state:
-    st.session_state["copie"] = None
+# if "profile_image" not in st.session_state["user_data"]:
+#     st.session_state["user_data"]["profile_image"] = None
 
-if "stop_flag" not in st.session_state:
-    st.session_state.stop_flag = False
+# if "copie" not in st.session_state:
+#     st.session_state["copie"] = None
 
-if "text_saver" not in st.session_state:
-    st.session_state.text_saver = ""
+# if "stop_flag" not in st.session_state:
+#     st.session_state.stop_flag = False
+
+# if "text_saver" not in st.session_state:
+#     st.session_state.text_saver = ""
  
-def stop_generation():
-    st.session_state.stop_flag = True
+# def stop_generation():
+#     st.session_state.stop_flag = True
 
-if "page" not in st.session_state:
-    st.session_state["page"] = "autentification"
+# if "page" not in st.session_state:
+#     st.session_state["page"] = "autentification"
 
-if st.session_state["page"] == "autentification":
-    init_db()
-    option_func()
-elif st.session_state["page"] == "main_screen":
-    with open("bot1.jpeg", "rb") as image_file:
-        default_image_data = image_file.read()
-    if "settings" not in st.session_state:
-        st.session_state["settings"] = {
-            "bot_name": "ChatBot",
-            "bot_image": default_image_data,
-            "text_color": "#000000",
-            "font": "Arial"
-        }
+# if st.session_state["page"] == "autentification":
+#     init_db()
+#     option_func()
+# elif st.session_state["page"] == "main_screen":
+#     with open("bot1.jpeg", "rb") as image_file:
+#         default_image_data = image_file.read()
+#     if "settings" not in st.session_state:
+#         st.session_state["settings"] = {
+#             "bot_name": "ChatBot",
+#             "bot_image": default_image_data,
+#             "text_color": "#000000",
+#             "font": "Arial"
+#         }
 
-    main_page()
-    options_menu()
+#     main_page()
+#     options_menu()
