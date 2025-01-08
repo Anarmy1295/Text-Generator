@@ -8,7 +8,7 @@ import os
 import tempfile
 import pdfplumber
 from docx import Document
-from backend import generate_response
+from backend import generate_response, generate_response_pdf
 
 def option_func():
     # titlul de inceput
@@ -136,6 +136,7 @@ def init_db():
 
 # functie pentru pagina principala
 def main_page():
+    text = ""
 
     if st.session_state["user_data"]["profile_image"]:
         st.markdown(
@@ -231,25 +232,29 @@ def main_page():
     if "copie" not in st.session_state:
         st.session_state["copie"] = None
 
-    
     uploaded_file = st.file_uploader("Upload a PDF or Word Document", type=["pdf", "docx"])
     
     if uploaded_file:
-        if uploaded_file != st.session_state["copie"]:
-            st.session_state["copie"] = uploaded_file 
+        if uploaded_file != st.session_state.get("copie"):
+            st.session_state["copie"] = uploaded_file
             st.session_state["pdf/doc"] = True
             file_name, file_extension = os.path.splitext(uploaded_file.name)
-            
+
             if file_extension == ".pdf":
                 st.write("Processing PDF file...")
                 try:
                     with pdfplumber.open(uploaded_file) as pdf:
-                        text = ""
                         for page in pdf.pages:
-                            text += page.extract_text()
+                            extracted_text = page.extract_text()
+                            if extracted_text:
+                                text += extracted_text
+                        st.write(f"text type: {type(text)}")
+                        st.write(f"text content: {text[:500]}")  # Show preview for debugging
+                        # print(f"uploaded file text: {text}")
                 except Exception as e:
                     st.error(f"Error processing PDF: {str(e)}")
-            
+                    text = ""  # Ensure text is empty if an error occurs
+
             elif file_extension == ".docx":
                 st.write("Processing Word file...")
                 try:
@@ -257,34 +262,30 @@ def main_page():
                     text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
                 except Exception as e:
                     st.error(f"Error processing Word document: {str(e)}")
+                    text = ""  # Ensure text is empty if an error occurs
+
             else:
                 st.warning("Unsupported file type.")
+                text = ""
 
-            st.session_state["messages"].append({"role": "user", "content":"file", "last": False})
+            st.session_state["messages"].append({"role": "user", "content": text, "last": False})
 
-            # genereaza raspuns in functie de mod
-            if st.session_state["chat_mode"] == "faster":
-                # assistant_response = f"{text}"
-                assistant_response = generate_response(text, "faster")
-            else:
-                assistant_response = generate_response(text, "slower")
-            
-            st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
-
-    
+    # Handle user input
     if prompt := st.chat_input("Say something"):
         st.session_state["started_chat"] = True
 
-        # adauga mesajul user-ului la istoric
+        # Add user message to session state
         st.session_state["messages"].append({"role": "user", "content": prompt, "last": False})
 
-        # genereaza raspuns in functie de mod
-        if st.session_state["chat_mode"] == "faster":
-            # assistant_response = f"{prompt}"
-            assistant_response = generate_response(prompt, "faster")
+        if uploaded_file:
+            text_pdf = st.session_state["messages"][-2]["content"]
+            assistant_response = generate_response_pdf(text_pdf, prompt)
         else:
-            assistant_response = generate_response(prompt, "slower")
-        
+            if st.session_state["chat_mode"] == "faster":
+                assistant_response = generate_response(prompt, "faster")
+            else:
+                assistant_response = generate_response(prompt, "slower")
+
         st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
 
 
@@ -388,9 +389,10 @@ def main_page():
 
 # text progresiv(cu delay)
 def animated_text_display(text, delay=0.2):
-    for word in text.split(" "):
-        yield word + " "
-        time.sleep(delay)
+    if text:
+        for word in text.split(" "):
+            yield word + " "
+            time.sleep(delay)
 
         
 def reset_password(username, new_password):
@@ -612,41 +614,7 @@ def info_reset():
     if st.button("Ok"):
         st.session_state["page"] = "autentification"
         st.rerun()
-
-# if "user_data" not in st.session_state:
-#     st.session_state["user_data"] = {}
-
-# if "profile_image" not in st.session_state["user_data"]:
-#     st.session_state["user_data"]["profile_image"] = None
-
-# if "copie" not in st.session_state:
-#     st.session_state["copie"] = None
-
-# if "stop_flag" not in st.session_state:
-#     st.session_state.stop_flag = False
-
-# if "text_saver" not in st.session_state:
-#     st.session_state.text_saver = ""
  
-# def stop_generation():
-#     st.session_state.stop_flag = True
-
-# if "page" not in st.session_state:
-#     st.session_state["page"] = "autentification"
-
-# if st.session_state["page"] == "autentification":
-#     init_db()
-#     option_func()
-# elif st.session_state["page"] == "main_screen":
-#     with open("bot1.jpeg", "rb") as image_file:
-#         default_image_data = image_file.read()
-#     if "settings" not in st.session_state:
-#         st.session_state["settings"] = {
-#             "bot_name": "ChatBot",
-#             "bot_image": default_image_data,
-#             "text_color": "#000000",
-#             "font": "Arial"
-#         }
-
-#     main_page()
-#     options_menu()
+def stop_generation():
+    st.session_state.stop_flag = True
+    

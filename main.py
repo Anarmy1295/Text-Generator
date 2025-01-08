@@ -2,8 +2,8 @@
 # from backend import main_screen
 
 # main_screen()
-
-from frontend import main_page, options_menu
+import streamlit as st
+from frontend import main_page, options_menu, init_db, option_func
 
 if "user_data" not in st.session_state:
     st.session_state["user_data"] = {}
@@ -19,9 +19,6 @@ if "stop_flag" not in st.session_state:
 
 if "text_saver" not in st.session_state:
     st.session_state.text_saver = ""
- 
-def stop_generation():
-    st.session_state.stop_flag = True
 
 if "page" not in st.session_state:
     st.session_state["page"] = "autentification"
