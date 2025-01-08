@@ -232,73 +232,6 @@ def main_page():
     if "copie" not in st.session_state:
         st.session_state["copie"] = None
 
-    
-    # uploaded_file = st.file_uploader("Upload a PDF or Word Document", type=["pdf", "docx"])
-    # # text_scanned = False
-    
-    # if uploaded_file:
-    #     st.write(f"{uploaded_file}")
-    #     if uploaded_file != st.session_state["copie"]:
-    #         st.session_state["copie"] = uploaded_file 
-    #         st.session_state["pdf/doc"] = True
-    #         file_name, file_extension = os.path.splitext(uploaded_file.name)
-            
-    #         if file_extension == ".pdf":
-    #             st.write("Processing PDF file...")
-    #             try:
-    #                 with pdfplumber.open(uploaded_file) as pdf:
-    #                     text = ""
-    #                     for page in pdf.pages:
-    #                         text += page.extract_text()
-    #                     st.write(f"text type: {type(text)}")
-    #                     st.write(f"text content: {text[:500]}")  # Show only the first 500 characters for debugging
-    #                     # text_scanned = True
-
-    #             except Exception as e:
-    #                 st.error(f"Error processing PDF: {str(e)}")
-            
-    #         elif file_extension == ".docx":
-    #             st.write("Processing Word file...")
-    #             try:
-    #                 doc = Document(uploaded_file)
-    #                 text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
-    #             except Exception as e:
-    #                 st.error(f"Error processing Word document: {str(e)}")
-    #         else:
-    #             st.warning("Unsupported file type.")
-
-    #         st.session_state["messages"].append({"role": "user", "content":"file", "last": False})
-
-    #         # # genereaza raspuns in functie de mod
-    #         # if st.session_state["chat_mode"] == "faster":
-    #         #     # assistant_response = f"{text}"
-    #         #     # assistant_response = generate_response(text, "faster")
-    #         #     assistant_response = generate_response_pdf(text, prompt)
-    #         # else:
-    #         #     # assistant_response = generate_response(text, "slower")
-    #         #     assistant_response = generate_response_pdf(text, prompt)
-            
-    #         # st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
-
-    
-    # if prompt := st.chat_input("Say something"):
-    #     st.session_state["started_chat"] = True
-
-    #     # adauga mesajul user-ului la istoric
-    #     st.session_state["messages"].append({"role": "user", "content": prompt, "last": False})
-
-    #     if uploaded_file:
-    #         assistant_response = generate_response_pdf(text, prompt)
-    #     else:
-    #         # genereaza raspuns in functie de mod
-    #         if st.session_state["chat_mode"] == "faster":
-    #             # assistant_response = f"{prompt}"
-    #             assistant_response = generate_response(prompt, "faster")
-    #         else:
-    #             assistant_response = generate_response(prompt, "slower")
-        
-    #     st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
-
     uploaded_file = st.file_uploader("Upload a PDF or Word Document", type=["pdf", "docx"])
     
     if uploaded_file:
@@ -335,9 +268,7 @@ def main_page():
                 st.warning("Unsupported file type.")
                 text = ""
 
-            # print(f"uploaded file text2: {text}")
             st.session_state["messages"].append({"role": "user", "content": text, "last": False})
-            # print(f"uploaded file text3: {text}")
 
     # Handle user input
     if prompt := st.chat_input("Say something"):
@@ -346,25 +277,7 @@ def main_page():
         # Add user message to session state
         st.session_state["messages"].append({"role": "user", "content": prompt, "last": False})
 
-        # text_pdf = st.session_state["messages"][-2]["content"]
-        # print(f"text_pdf: {text_pdf}")
-
-        # assistant_response = ""
-        #  
-        # # Generate assistant response based on file input or prompt
-        # if uploaded_file and text:
-        #     assistant_response = generate_response_pdf(text, prompt)
-        # elif not uploaded_file:
-        #     if st.session_state["chat_mode"] == "faster":
-        #         assistant_response = generate_response(prompt, "faster")
-        #     else:
-        #         assistant_response = generate_response(prompt, "slower")
-        # else:
-        #     st.error("No text available for processing. Please upload a valid file or input text.")
-
         if uploaded_file:
-            # print(f"frontend -> text: {text}")
-            # print(f"text_pdf: {text_pdf}")
             text_pdf = st.session_state["messages"][-2]["content"]
             assistant_response = generate_response_pdf(text_pdf, prompt)
         else:
@@ -701,41 +614,7 @@ def info_reset():
     if st.button("Ok"):
         st.session_state["page"] = "autentification"
         st.rerun()
-
-# if "user_data" not in st.session_state:
-#     st.session_state["user_data"] = {}
-
-# if "profile_image" not in st.session_state["user_data"]:
-#     st.session_state["user_data"]["profile_image"] = None
-
-# if "copie" not in st.session_state:
-#     st.session_state["copie"] = None
-
-# if "stop_flag" not in st.session_state:
-#     st.session_state.stop_flag = False
-
-# if "text_saver" not in st.session_state:
-#     st.session_state.text_saver = ""
  
 def stop_generation():
     st.session_state.stop_flag = True
-
-# if "page" not in st.session_state:
-#     st.session_state["page"] = "autentification"
-
-# if st.session_state["page"] == "autentification":
-#     init_db()
-#     option_func()
-# elif st.session_state["page"] == "main_screen":
-#     with open("bot1.jpeg", "rb") as image_file:
-#         default_image_data = image_file.read()
-#     if "settings" not in st.session_state:
-#         st.session_state["settings"] = {
-#             "bot_name": "ChatBot",
-#             "bot_image": default_image_data,
-#             "text_color": "#000000",
-#             "font": "Arial"
-#         }
-
-#     main_page()
-#     options_menu()
+    
