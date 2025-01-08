@@ -3,7 +3,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
-from functions import split_input, sample_n_words, sample_next_word, stochastic_matrix, k_secv, k_secv_idx, distinct_k_secv, distinct_words, word_idx
+from functions import split_input, sample_n_words, sample_next_word, stochastic_matrix, k_secv, k_secv_idx, distinct_k_secv, distinct_words, word_idx, prob_choose
 
 # # # Initialize global variables for chat history
 # # if "chat_history" not in st.session_state:

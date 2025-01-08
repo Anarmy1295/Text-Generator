@@ -8,7 +8,7 @@ import os
 import tempfile
 import pdfplumber
 from docx import Document
-from backend import generate_response
+from backend import generate_response, generate_response_pdf
 
 def option_func():
     # titlul de inceput
@@ -262,14 +262,16 @@ def main_page():
 
             st.session_state["messages"].append({"role": "user", "content":"file", "last": False})
 
-            # genereaza raspuns in functie de mod
-            if st.session_state["chat_mode"] == "faster":
-                # assistant_response = f"{text}"
-                assistant_response = generate_response(text, "faster")
-            else:
-                assistant_response = generate_response(text, "slower")
+            # # genereaza raspuns in functie de mod
+            # if st.session_state["chat_mode"] == "faster":
+            #     # assistant_response = f"{text}"
+            #     # assistant_response = generate_response(text, "faster")
+            #     assistant_response = generate_response_pdf(text, prompt)
+            # else:
+            #     # assistant_response = generate_response(text, "slower")
+            #     assistant_response = generate_response_pdf(text, prompt)
             
-            st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
+            # st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
 
     
     if prompt := st.chat_input("Say something"):
@@ -278,12 +280,15 @@ def main_page():
         # adauga mesajul user-ului la istoric
         st.session_state["messages"].append({"role": "user", "content": prompt, "last": False})
 
-        # genereaza raspuns in functie de mod
-        if st.session_state["chat_mode"] == "faster":
-            # assistant_response = f"{prompt}"
-            assistant_response = generate_response(prompt, "faster")
+        if uploaded_file:
+            assistant_response = generate_response_pdf(time, prompt)
         else:
-            assistant_response = generate_response(prompt, "slower")
+            # genereaza raspuns in functie de mod
+            if st.session_state["chat_mode"] == "faster":
+                # assistant_response = f"{prompt}"
+                assistant_response = generate_response(prompt, "faster")
+            else:
+                assistant_response = generate_response(prompt, "slower")
         
         st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
 
@@ -628,8 +633,8 @@ def info_reset():
 # if "text_saver" not in st.session_state:
 #     st.session_state.text_saver = ""
  
-# def stop_generation():
-#     st.session_state.stop_flag = True
+def stop_generation():
+    st.session_state.stop_flag = True
 
 # if "page" not in st.session_state:
 #     st.session_state["page"] = "autentification"
