@@ -2,11 +2,12 @@
 
 1) Short description
 
-This application, developed using Streamlit, provides a user-friendly interface for interacting with an text generator. To access the application, users must log in or create an account. When creating a new account, a default profile picture is assigned, which can be customized later. The database securely stores user information along with the profile picture. Once logged in, users can interact with the app by entering text or uploading documents. The generator processes the input and provides a response. Various settings and options are available through a sidebar menu, offering a personalized experience. In the Home section, users can choose between two modes of text generation: a fast mode that prioritizes speed but offers lower quality, or a slow mode that focuses on delivering higher-quality responses. Additionally, users have the ability to stop the text generation process at any time. The Settings section allows users to update their profile picture, delete their account, or change their password. In the Preferences section, users can customize the text font, change the bot’s name and avatar, or log out of the application.
+This application, developed using Streamlit, provides a user-friendly interface for interacting with a text generator. To access the application, users must log in or create an account. When creating a new account, a default profile picture is assigned, which can be customized later. The database securely stores user information along with the profile picture. Once logged in, users can interact with the app by entering text or uploading documents. The generator processes the input and provides a response. Various settings and options are available through a sidebar menu, offering a personalized experience. In the Home section, users can choose between two modes of text generation: a fast mode that prioritizes speed but offers lower quality, or a slow mode that focuses on delivering higher-quality responses. Additionally, users have the ability to stop the text generation process at any time. The Settings section allows users to update their profile picture, delete their account, or change their password. In the Preferences section, users can customize the text font, change the bot’s name and avatar, or log out of the application.
 
 2) Github link
+https://github.com/Anarmy1295/Text-Generator
 
-3) Technologies used
+4) Technologies used
 
 Frontend: streamlit, sqlite3, hashlib, base64, time, pdfplumber
 
