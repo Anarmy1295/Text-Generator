@@ -291,14 +291,21 @@ def generate_response(prompt, mode):
     return response
 
 def generate_response_pdf(text, prompt):
+    # print(text)
+    print(prompt)
     corpus = split_input(text)
+    # print(corpus)
     k = 2
     word_set = distinct_words(corpus)
+    # print(word_set)
     k_secv_corpus = k_secv(corpus, k)
+    # print(k_secv_corpus)
     k_secv_set = distinct_k_secv(k_secv_corpus)
     widx = word_idx(word_set)
+    # print(k_secv_set)
     kscvidx = k_secv_idx(k_secv_set)
+    # print(kscvidx)
     stoch = stochastic_matrix(k_secv_corpus, corpus, word_set, k_secv_set, k)
-    probs = sample_next_word(split_input(prompt), widx, kscvidx, k, stoch)
-    prob_choose(probs, word_set)
-    sample_n_words(split_input(prompt), widx, kscvidx, k, stoch, word_set, 10)
+    # probs = sample_next_word(split_input(prompt), widx, kscvidx, k, stoch)
+    # prob_choose(probs, word_set)
+    return sample_n_words(split_input(prompt), widx, kscvidx, k, stoch, word_set, 10)

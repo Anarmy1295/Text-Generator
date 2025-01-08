@@ -136,6 +136,7 @@ def init_db():
 
 # functie pentru pagina principala
 def main_page():
+    text = ""
 
     if st.session_state["user_data"]["profile_image"]:
         st.markdown(
@@ -232,24 +233,95 @@ def main_page():
         st.session_state["copie"] = None
 
     
+    # uploaded_file = st.file_uploader("Upload a PDF or Word Document", type=["pdf", "docx"])
+    # # text_scanned = False
+    
+    # if uploaded_file:
+    #     st.write(f"{uploaded_file}")
+    #     if uploaded_file != st.session_state["copie"]:
+    #         st.session_state["copie"] = uploaded_file 
+    #         st.session_state["pdf/doc"] = True
+    #         file_name, file_extension = os.path.splitext(uploaded_file.name)
+            
+    #         if file_extension == ".pdf":
+    #             st.write("Processing PDF file...")
+    #             try:
+    #                 with pdfplumber.open(uploaded_file) as pdf:
+    #                     text = ""
+    #                     for page in pdf.pages:
+    #                         text += page.extract_text()
+    #                     st.write(f"text type: {type(text)}")
+    #                     st.write(f"text content: {text[:500]}")  # Show only the first 500 characters for debugging
+    #                     # text_scanned = True
+
+    #             except Exception as e:
+    #                 st.error(f"Error processing PDF: {str(e)}")
+            
+    #         elif file_extension == ".docx":
+    #             st.write("Processing Word file...")
+    #             try:
+    #                 doc = Document(uploaded_file)
+    #                 text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+    #             except Exception as e:
+    #                 st.error(f"Error processing Word document: {str(e)}")
+    #         else:
+    #             st.warning("Unsupported file type.")
+
+    #         st.session_state["messages"].append({"role": "user", "content":"file", "last": False})
+
+    #         # # genereaza raspuns in functie de mod
+    #         # if st.session_state["chat_mode"] == "faster":
+    #         #     # assistant_response = f"{text}"
+    #         #     # assistant_response = generate_response(text, "faster")
+    #         #     assistant_response = generate_response_pdf(text, prompt)
+    #         # else:
+    #         #     # assistant_response = generate_response(text, "slower")
+    #         #     assistant_response = generate_response_pdf(text, prompt)
+            
+    #         # st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
+
+    
+    # if prompt := st.chat_input("Say something"):
+    #     st.session_state["started_chat"] = True
+
+    #     # adauga mesajul user-ului la istoric
+    #     st.session_state["messages"].append({"role": "user", "content": prompt, "last": False})
+
+    #     if uploaded_file:
+    #         assistant_response = generate_response_pdf(text, prompt)
+    #     else:
+    #         # genereaza raspuns in functie de mod
+    #         if st.session_state["chat_mode"] == "faster":
+    #             # assistant_response = f"{prompt}"
+    #             assistant_response = generate_response(prompt, "faster")
+    #         else:
+    #             assistant_response = generate_response(prompt, "slower")
+        
+    #     st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
+
     uploaded_file = st.file_uploader("Upload a PDF or Word Document", type=["pdf", "docx"])
     
     if uploaded_file:
-        if uploaded_file != st.session_state["copie"]:
-            st.session_state["copie"] = uploaded_file 
+        if uploaded_file != st.session_state.get("copie"):
+            st.session_state["copie"] = uploaded_file
             st.session_state["pdf/doc"] = True
             file_name, file_extension = os.path.splitext(uploaded_file.name)
-            
+
             if file_extension == ".pdf":
                 st.write("Processing PDF file...")
                 try:
                     with pdfplumber.open(uploaded_file) as pdf:
-                        text = ""
                         for page in pdf.pages:
-                            text += page.extract_text()
+                            extracted_text = page.extract_text()
+                            if extracted_text:
+                                text += extracted_text
+                        st.write(f"text type: {type(text)}")
+                        st.write(f"text content: {text[:500]}")  # Show preview for debugging
+                        # print(f"uploaded file text: {text}")
                 except Exception as e:
                     st.error(f"Error processing PDF: {str(e)}")
-            
+                    text = ""  # Ensure text is empty if an error occurs
+
             elif file_extension == ".docx":
                 st.write("Processing Word file...")
                 try:
@@ -257,39 +329,50 @@ def main_page():
                     text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
                 except Exception as e:
                     st.error(f"Error processing Word document: {str(e)}")
+                    text = ""  # Ensure text is empty if an error occurs
+
             else:
                 st.warning("Unsupported file type.")
+                text = ""
 
-            st.session_state["messages"].append({"role": "user", "content":"file", "last": False})
+            # print(f"uploaded file text2: {text}")
+            st.session_state["messages"].append({"role": "user", "content": text, "last": False})
+            # print(f"uploaded file text3: {text}")
 
-            # # genereaza raspuns in functie de mod
-            # if st.session_state["chat_mode"] == "faster":
-            #     # assistant_response = f"{text}"
-            #     # assistant_response = generate_response(text, "faster")
-            #     assistant_response = generate_response_pdf(text, prompt)
-            # else:
-            #     # assistant_response = generate_response(text, "slower")
-            #     assistant_response = generate_response_pdf(text, prompt)
-            
-            # st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
-
-    
+    # Handle user input
     if prompt := st.chat_input("Say something"):
         st.session_state["started_chat"] = True
 
-        # adauga mesajul user-ului la istoric
+        # Add user message to session state
         st.session_state["messages"].append({"role": "user", "content": prompt, "last": False})
 
+        # text_pdf = st.session_state["messages"][-2]["content"]
+        # print(f"text_pdf: {text_pdf}")
+
+        # assistant_response = ""
+        #  
+        # # Generate assistant response based on file input or prompt
+        # if uploaded_file and text:
+        #     assistant_response = generate_response_pdf(text, prompt)
+        # elif not uploaded_file:
+        #     if st.session_state["chat_mode"] == "faster":
+        #         assistant_response = generate_response(prompt, "faster")
+        #     else:
+        #         assistant_response = generate_response(prompt, "slower")
+        # else:
+        #     st.error("No text available for processing. Please upload a valid file or input text.")
+
         if uploaded_file:
-            assistant_response = generate_response_pdf(time, prompt)
+            # print(f"frontend -> text: {text}")
+            # print(f"text_pdf: {text_pdf}")
+            text_pdf = st.session_state["messages"][-2]["content"]
+            assistant_response = generate_response_pdf(text_pdf, prompt)
         else:
-            # genereaza raspuns in functie de mod
             if st.session_state["chat_mode"] == "faster":
-                # assistant_response = f"{prompt}"
                 assistant_response = generate_response(prompt, "faster")
             else:
                 assistant_response = generate_response(prompt, "slower")
-        
+
         st.session_state["messages"].append({"role": "assistant", "content": assistant_response, "processed": False})
 
 
@@ -393,9 +476,10 @@ def main_page():
 
 # text progresiv(cu delay)
 def animated_text_display(text, delay=0.2):
-    for word in text.split(" "):
-        yield word + " "
-        time.sleep(delay)
+    if text:
+        for word in text.split(" "):
+            yield word + " "
+            time.sleep(delay)
 
         
 def reset_password(username, new_password):
